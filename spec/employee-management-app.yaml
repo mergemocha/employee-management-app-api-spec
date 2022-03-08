@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: employee-management-app
+  version: v1.0.0
+  description: ''
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: 'http://localhost:3001/api/v1'
+    description: v1
+paths:
+  /auth/login:
+    post:
+      summary: ''
+      operationId: post-auth-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                required:
+                  - message
+                  - token
+              examples:
+                Response:
+                  value:
+                    message: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+              examples:
+                Response for duplicate authentication strategies:
+                  value:
+                    message: Both username+password and token authentication supplied; can only authenticate with one strategy at a time
+                Response for no authentication strategy:
+                  value:
+                    message: No authentication strategy suppliedNo authentication strategy supplied
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+              examples:
+                Response for invalid username/password:
+                  value:
+                    message: Invalid username or password
+                Response for invalid auth token:
+                  value:
+                    message: Unauthorized
+      description: Logs a user in either through processing their credentials (username and password) or by validating and refreshing their authentication token.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: 'Authentication token previously issued by server, if applicable.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+            examples:
+              Example:
+                value:
+                  username: superuser
+                  password: test
+        description: Body to use when authenticating with username and password (i.e. token has not been previously issued or issued token has expired).
+  /auth/logout:
+    post:
+      summary: ''
+      operationId: post-auth-logout
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+              examples:
+                Response:
+                  value:
+                    message: OK
+        '410':
+          description: Gone
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+              examples:
+                Response:
+                  value:
+                    message: Unknown session
+      description: Logs a user out by terminating the session related to their authentication token.
+components:
+  schemas: {}
+  securitySchemes:
+    Authentication token:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: ''
+security:
+  - Authentication token: []

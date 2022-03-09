@@ -12,63 +12,17 @@ servers:
 paths:
   /auth/login:
     post:
-      summary: ''
+      summary: Login
       operationId: post-auth-login
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  token:
-                    type: string
-                required:
-                  - message
-                  - token
-              examples:
-                Response:
-                  value:
-                    message: OK
+          $ref: '#/components/responses/200'
         '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-              examples:
-                Response for duplicate authentication strategies:
-                  value:
-                    message: Both username+password and token authentication supplied; can only authenticate with one strategy at a time
-                Response for no authentication strategy:
-                  value:
-                    message: No authentication strategy suppliedNo authentication strategy supplied
+          $ref: '#/components/responses/400'
         '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-              examples:
-                Response for invalid username/password:
-                  value:
-                    message: Invalid username or password
-                Response for invalid auth token:
-                  value:
-                    message: Unauthorized
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
       description: Logs a user in either through processing their credentials (username and password) or by validating and refreshing their authentication token.
       parameters:
         - schema:
@@ -92,26 +46,16 @@ paths:
                   username: superuser
                   password: test
         description: Body to use when authenticating with username and password (i.e. token has not been previously issued or issued token has expired).
+      security: []
   /auth/logout:
     post:
-      summary: ''
+      summary: Logout
       operationId: post-auth-logout
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-              examples:
-                Response:
-                  value:
-                    message: OK
+          $ref: '#/components/responses/200'
+        '401':
+          $ref: '#/components/responses/401'
         '410':
           description: Gone
           content:
@@ -127,14 +71,436 @@ paths:
                 Response:
                   value:
                     message: Unknown session
+        '500':
+          $ref: '#/components/responses/500'
       description: Logs a user out by terminating the session related to their authentication token.
+  /employees:
+    post:
+      summary: ''
+      operationId: post-employees
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400-Validation'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Creates a new employee.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeePartial'
+        description: Details of the employee to create.
+      security:
+        - Superuser token: []
+    get:
+      summary: Read and create employees
+      operationId: get-employees
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Returns a list of all employees. Properties of the employee objects may be filtered away depending on user permissions and server configuration. All properties of the employee object should therefore be considered optional.
+  '/employees/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: Employee ID
+    patch:
+      summary: Update and delete employees
+      operationId: patch-employees-id
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400-Validation'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Updates the information of an employee.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeePartial'
+            examples:
+              Example:
+                value:
+                  id: 62273e66c62057b707d2df21
+                  firstName: John
+                  lastName: Appleseed
+                  title: Senior Software Developer
+                  salary: 100000
+                  secLevel: 5
+                  permanent: true
+                  projects:
+                    - Mastodon
+                    - Hubbard
+        description: 'Properties to update. All properties are optional, and only the values of declared properties are changed.'
+      security:
+        - Superuser token: []
+    delete:
+      summary: ''
+      operationId: delete-employees-id
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Deletes an employee.
+      security:
+        - Superuser token: []
+  /permissions/available:
+    get:
+      summary: Get available permissions
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+              examples:
+                Example:
+                  value:
+                    - 'read:employee.salary'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: get-permissions-available
+      security:
+        - Superuser token: []
+      description: Returns all available permissions.
+  '/permissions/{user}':
+    parameters:
+      - schema:
+          type: string
+        name: user
+        in: path
+        required: true
+        description: User ID
+    get:
+      summary: Read and update user permissions
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+              examples:
+                Example:
+                  value:
+                    - 'read:employee.salary'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: get-permissions-user
+      description: Returns permissions for a user.
+      security:
+        - Superuser token: []
+    patch:
+      summary: ''
+      operationId: patch-permissions-user
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          description: Returned when an attempt is made to modify permissions for the superuser.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+              examples:
+                Example:
+                  value:
+                    message: Superuser permissions cannot be modified
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Updates the permissions of a user.
+      security:
+        - Superuser token: []
+  /register/add-user:
+    post:
+      summary: Register new user
+      operationId: post-register-add-user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                required:
+                  - message
+                  - token
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Registers a new user.
+      parameters: []
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+        description: Details for the user to create.
 components:
-  schemas: {}
+  schemas:
+    EmployeePartial:
+      title: Employee
+      type: object
+      description: Represents the mutable data of an Employee object.
+      examples:
+        - id: 62273e66c62057b707d2df21
+          firstName: John
+          lastName: Appleseed
+          title: Senior Software Developer
+          salary: 100000
+          secLevel: 5
+          permanent: true
+          projects:
+            - Mastodon
+            - Hubbard
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        title:
+          type: string
+        salary:
+          type: integer
+        secLevel:
+          type: integer
+        permanent:
+          type: boolean
+        projects:
+          type: array
+          items:
+            type: string
+    Employee:
+      title: Employee
+      type: object
+      description: |-
+        Represents an employee in the system.
+
+        Properties o Employee objects may be filtered away depending on user permissions and server configuration. All properties of the Employee object, apart from `id`, should therefore be considered non-guaranteed to be delivered.
+      examples:
+        - id: 62273e66c62057b707d2df21
+          firstName: John
+          lastName: Appleseed
+          title: Senior Software Developer
+          salary: 100000
+          secLevel: 5
+          permanent: true
+          projects:
+            - Mastodon
+            - Hubbard
+      properties:
+        id:
+          type: string
+          description: MongoDB object ID
+        firstName:
+          type: string
+        lastName:
+          type: string
+        title:
+          type: string
+        salary:
+          type: integer
+        secLevel:
+          type: integer
+        permanent:
+          type: boolean
+        projects:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+    Permission:
+      type: string
+      title: Permission
+      example: 'read:employee.salary'
+      pattern: '^read:employee\..+$'
+      description: Represents a permission to read a certain key of an Employee object.
   securitySchemes:
-    Authentication token:
+    User token:
       name: Authorization
       type: apiKey
       in: header
-      description: ''
+      description: 'Token for a regular user. Can read employees, but not CUD them.'
+    Superuser token:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: 'Token for the superuser. Can CRUD employees, as well as grant or deny permissions for users.'
+  responses:
+    '200':
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+          examples:
+            Example:
+              value:
+                message: OK
+    '400':
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          examples:
+            Example:
+              value:
+                message: Bad Request
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+          examples:
+            Example:
+              value:
+                message: Unauthorized
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+          examples:
+            Example:
+              value:
+                message: Not Found
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+            required:
+              - error
+              - message
+          examples:
+            Example:
+              value:
+                error: Internal Server Error
+                message: Cannot read property 'test' of undefined
+    400-Validation:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              error:
+                type: object
+                description: '@hapi/joi validation error list'
+                properties:
+                  _original:
+                    type: object
+                  details:
+                    type: array
+                    items: {}
+            required:
+              - message
+          examples:
+            Example:
+              value:
+                message: Validation error
+                error:
+                  _original: {}
+                  details:
+                    - message: '"firstName" is required'
+                      path:
+                        - firstName
+                      type: any.required
+                      context:
+                        label: firstName
+                        key: firstName
 security:
   - Authentication token: []

@@ -392,7 +392,7 @@ components:
       description: 'Token for the superuser. Can CRUD employees, as well as grant or deny permissions for users.'
   responses:
     '200':
-      description: Returned when the request completed successfully.
+      description: OK
       content:
         application/json:
           schema:
@@ -407,7 +407,7 @@ components:
               value:
                 message: OK
     '400':
-      description: Returned when the request was incorrectly formatted.
+      description: Bad Request
       content:
         application/json:
           schema:
@@ -420,7 +420,7 @@ components:
               value:
                 message: Bad Request
     '401':
-      description: Returned when user has supplied incorrect authentication credentials.
+      description: Unauthorized
       content:
         application/json:
           schema:
@@ -435,7 +435,7 @@ components:
               value:
                 message: Unauthorized
     '404':
-      description: Returned when the requested resource was not found.
+      description: Not Found
       content:
         application/json:
           schema:
@@ -450,7 +450,7 @@ components:
               value:
                 message: Not Found
     '500':
-      description: Returned when the server encountered an unrecoverable internal error.
+      description: Internal Server Error
       content:
         application/json:
           schema:
@@ -469,7 +469,7 @@ components:
                 error: Internal Server Error
                 message: Cannot read property 'test' of undefined
     400-Validation:
-      description: 'Returned when the request body (usually for an Employee object) did not match the expected schema. The `error` object is a https://github.com/sideway/joi validation error.'
+      description: Bad Request
       content:
         application/json:
           schema:
@@ -479,7 +479,7 @@ components:
                 type: string
               error:
                 type: object
-                description: '@hapi/joi validation error list'
+                description: 'https://github.com/sideway/joi validation error'
                 properties:
                   _original:
                     type: object
@@ -488,6 +488,7 @@ components:
                     items: {}
             required:
               - message
+              - error
           examples:
             Example:
               value:
@@ -503,4 +504,4 @@ components:
                         label: firstName
                         key: firstName
 security:
-  - user-token: []
+  - User token: []

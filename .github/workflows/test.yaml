@@ -12,9 +12,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
-      - name: Install npm@latest
-        run: sudo npm i -g npm
       - name: Install dependencies
-        run: npm i
+        run: npm ci
       - name: Lint
         run: npm test
+      - name: Build
+        run: npm run build

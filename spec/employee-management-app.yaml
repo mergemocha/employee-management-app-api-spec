@@ -95,7 +95,7 @@ paths:
               $ref: '#/components/schemas/EmployeePartial'
         description: Details of the employee to create.
       security:
-        - Superuser token: []
+        - superuser-token: []
     get:
       summary: Get all employees
       operationId: get-employees
@@ -156,7 +156,7 @@ paths:
                     - Hubbard
         description: 'Properties to update. All properties are optional, and only the values of declared properties are changed.'
       security:
-        - Superuser token: []
+        - superuser-token: []
     delete:
       summary: Delete employee
       operationId: delete-employees-id
@@ -169,7 +169,7 @@ paths:
           $ref: '#/components/responses/500'
       description: Deletes an employee.
       security:
-        - Superuser token: []
+        - superuser-token: []
   /permissions/available:
     get:
       summary: Get available permissions
@@ -193,7 +193,7 @@ paths:
           $ref: '#/components/responses/500'
       operationId: get-permissions-available
       security:
-        - Superuser token: []
+        - superuser-token: []
       description: Returns all available permissions.
   '/permissions/{user}':
     parameters:
@@ -228,7 +228,7 @@ paths:
       operationId: get-permissions-user
       description: Returns permissions for a user.
       security:
-        - Superuser token: []
+        - superuser-token: []
     patch:
       summary: Update user permissions
       operationId: patch-permissions-user
@@ -258,7 +258,7 @@ paths:
           $ref: '#/components/responses/500'
       description: Updates the permissions of a user.
       security:
-        - Superuser token: []
+        - superuser-token: []
   /register/add-user:
     post:
       summary: Register new user
@@ -380,19 +380,19 @@ components:
       pattern: '^read:employee\..+$'
       description: Represents a permission to read a certain key of an Employee object.
   securitySchemes:
-    User token:
+    user-token:
       name: Authorization
       type: apiKey
       in: header
       description: 'Token for a regular user. Can read employees, but not CUD them.'
-    Superuser token:
+    superuser-token:
       name: Authorization
       type: apiKey
       in: header
       description: 'Token for the superuser. Can CRUD employees, as well as grant or deny permissions for users.'
   responses:
     '200':
-      description: Example response
+      description: Returned when the request completed successfully.
       content:
         application/json:
           schema:
@@ -407,7 +407,7 @@ components:
               value:
                 message: OK
     '400':
-      description: Example response
+      description: Returned when the request was incorrectly formatted.
       content:
         application/json:
           schema:
@@ -420,7 +420,7 @@ components:
               value:
                 message: Bad Request
     '401':
-      description: Unauthorized
+      description: Returned when user has supplied incorrect authentication credentials.
       content:
         application/json:
           schema:
@@ -435,7 +435,7 @@ components:
               value:
                 message: Unauthorized
     '404':
-      description: Not Found
+      description: Returned when the requested resource was not found.
       content:
         application/json:
           schema:
@@ -450,7 +450,7 @@ components:
               value:
                 message: Not Found
     '500':
-      description: Internal Server Error
+      description: Returned when the server encountered an unrecoverable internal error.
       content:
         application/json:
           schema:
@@ -469,7 +469,7 @@ components:
                 error: Internal Server Error
                 message: Cannot read property 'test' of undefined
     400-Validation:
-      description: Bad Request
+      description: 'Returned when the request body (usually for an Employee object) did not match the expected schema. The `error` object is a https://github.com/sideway/joi validation error.'
       content:
         application/json:
           schema:
@@ -503,4 +503,4 @@ components:
                         label: firstName
                         key: firstName
 security:
-  - User token: []
+  - user-token: []

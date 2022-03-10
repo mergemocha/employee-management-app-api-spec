@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "redoc-cli serve spec/employee-management-app.yaml --watch",
-    "build": "redoc-cli bundle spec/employee-management-app.yaml",
+    "build": "mkdir build && redoc-cli bundle spec/employee-management-app.yaml && mv redoc-static.html build/index.html",
     "test": "openapi lint spec/employee-management-app.yaml"
   },
   "repository": {

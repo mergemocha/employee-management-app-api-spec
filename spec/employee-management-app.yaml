@@ -299,6 +299,34 @@ paths:
                 - username
                 - password
         description: Details for the user to create.
+  /users:
+    get:
+      summary: Get all users
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                Example:
+                  value:
+                    - id: 62273e66c62057b707d2df21
+                      username: test-user
+                      permissions:
+                        - 'read:employee.salary'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: get-users
+      description: Returns all users registered in the system.
+      security:
+        - superuser-token: []
 components:
   schemas:
     EmployeePartial:
@@ -379,6 +407,27 @@ components:
       example: 'read:employee.salary'
       pattern: '^read:employee\..+$'
       description: Represents a permission to read a certain key of an Employee object.
+    User:
+      title: User
+      type: object
+      description: 'Represents a user in the application. This is a subset of the actual user object with internal fields like `password` and `isSuperuser` removed. The superuser is also not included in the data, as the permissions for the superuser cannot be modified.'
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+      required:
+        - id
+        - username
+      examples:
+        - id: 62273e66c62057b707d2df21
+          username: test-user
+          permissions:
+            - 'read:employee.salary'
   securitySchemes:
     user-token:
       name: Authorization

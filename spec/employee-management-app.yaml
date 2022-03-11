@@ -327,6 +327,21 @@ paths:
       description: Returns all users registered in the system.
       security:
         - superuser-token: []
+  /permissions/check:
+    get:
+      summary: Check for superuser privileges
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: get-permissions-check
+      description: 'Checks whether user is a superuser, returning 401 if not and 200 if yes.'
+      security:
+        - superuser-token: []
 components:
   schemas:
     EmployeePartial:
